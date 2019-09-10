@@ -99,7 +99,12 @@ class AzureAdOAuthenticator(OAuthenticator):
         id_token = resp_json['id_token']
         decoded = jwt.decode(id_token, verify=False)
 
-        userdict = {"name": decoded[self.username_claim]}
+        try:
+            userdict = {"name": decoded[self.username_claim]}
+        except KeyError:
+            msg = 'username_claim "{}" not available. available are {}'
+            app_log.info(msg.format(self.username_claim, list(decoded.keys())))
+
         userdict["auth_state"] = auth_state = {}
         auth_state['access_token'] = access_token
         # results in a decoded JWT for the user data
